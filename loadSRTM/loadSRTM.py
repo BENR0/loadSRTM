@@ -7,6 +7,7 @@ import re
 import logging
 #import gdal
 from tqdm import tqdm
+import zipfile
 from datetime import datetime, timedelta
 from multiprocessing.dummy import Pool # use threads
 
@@ -34,7 +35,6 @@ class loadSRTM(object):
         #bbox: [left, bottom, right, top]
         self.bbox = bbox
         self.targetDir = targetDir
-        self.tilenames = []
         self.fileURLs = []
         #path list also stores fileURLs so maybe change methods to accomodate that and remove
         self.pathList = []
@@ -79,10 +79,10 @@ class loadSRTM(object):
                         else:
                             latpref = "n"
 
-                        tile = lonpref + str(abs(curlon)) + latpref + str(abs(curlat + 50))
-                        demurl = os.path.join(self.service, tile, tile + ".dem.zip")
-                        prjurl = os.path.join(self.service, tile, tile + ".prj.zip")
-                        hdrurl = os.path.join(self.service, tile, tile + ".hdr.zip")
+                        tile = lonpref + "{:0>3}".format(abs(curlon)) + latpref + str(abs(curlat + 50))
+                        demurl = os.path.join(self.serviceURL, tile, tile + ".dem.zip")
+                        prjurl = os.path.join(self.serviceURL, tile, tile + ".prj.zip")
+                        hdrurl = os.path.join(self.serviceURL, tile, tile + ".hdr.zip")
 
                         self.fileURLs.append(demurl)
                         self.fileURLs.append(prjurl)
@@ -116,10 +116,10 @@ class loadSRTM(object):
         Return
         ------
         """
-        if self.targetDir is none or directory is None:
+        if self.targetDir is None or directory is None:
             print("No target directory given.")
-        elif directory is none:
-            directory = self.targetDir
+            if directory is None:
+                directory = self.targetDir
 
         def pathTuple(url, directory = directory):
             return((url, directory))
@@ -189,5 +189,30 @@ class loadSRTM(object):
 
         pass
 
+
+    def unpack(self):
+        """Unpack downloaded zip files
+
+        Parameters
+        ----------
+        param: dtype
+            description
+
+        
+        Return
+        ------
+        """
+        def up(file, targetdir = "."):
+            with ZipFile(file, "r") as zfile:
+                zfile.extractall(targetdir)
+            return
+
+
+        logger.debug("Unziping files...")
+        print("Unziping files...")
+
+        map(download, self.pathList)
+        
+        pass
 
 # if __name__ == "__main__":
