@@ -80,7 +80,13 @@ class loadSRTM(object):
                             latpref = "n"
 
                         tile = lonpref + str(abs(curlon)) + latpref + str(abs(curlat + 50))
-                        self.tilenames.append(tile)
+                        demurl = os.path.join(self.service, tile, tile + ".dem.zip")
+                        prjurl = os.path.join(self.service, tile, tile + ".prj.zip")
+                        hdrurl = os.path.join(self.service, tile, tile + ".hdr.zip")
+
+                        self.fileURLs.append(demurl)
+                        self.fileURLs.append(prjurl)
+                        self.fileURLs.append(hdrurl)
 
                     curlat += 50
             
@@ -110,13 +116,13 @@ class loadSRTM(object):
         Return
         ------
         """
-        directory = self.targetDir
+        if self.targetDir is none or directory is None:
+            print("No target directory given.")
+        elif directory is none:
+            directory = self.targetDir
 
         def pathTuple(url, directory = directory):
-            secfield = os.path.basename(url).split(".")[1]
-            year = secfield[1:5]
-            outdir = os.path.join(directory, year)
-            return((url, outdir))
+            return((url, directory))
 
         def download(itemtuple):
             #unpack tuple
